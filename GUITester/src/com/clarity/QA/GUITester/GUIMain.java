@@ -23,10 +23,10 @@ public class GUIMain {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         
         XmlSuite suite = new XmlSuite();
-        suite.setName("Clarity Test Suite");
+        suite.setName("Clarity GUI Test Suite");
         suite.addListener(guiClassPath + ".InitDriverListener");
-//        String[] fileArray = {"/Users/jgorski/Tests/GUI/login.csv","/Users/jgorski/Tests/GUI/newgui.csv"};
-        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
+//        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
+        String[] fileArray = {"/Users/jgorski/Tests/API/firstGUITest.xlsx"};
         String fileName;
         if(args.length > 0) {
         	fileName = args[0];
@@ -64,6 +64,9 @@ public class GUIMain {
         }
         List<XmlSuite> suites = new ArrayList<>();
         suites.add(suite);
+        /*
+         * run suites
+         */
         TestNG tng = new TestNG();
         tng.setUseDefaultListeners(false);
         tng.addListener(new HTMLReporter());
