@@ -126,5 +126,6 @@
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-ooxml-schemas-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-scratchpad-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.27-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

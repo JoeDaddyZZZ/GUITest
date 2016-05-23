@@ -1,13 +1,23 @@
 package com.clarity.QA.GUITester;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
 import org.testng.Reporter;
 
 public class CommandExecutor {
@@ -37,6 +47,7 @@ public class CommandExecutor {
                               break;
             case "Click": Reporter.log("Clicking on element with "+identifierType+" = '"+elementIdentifier+"'");
                           driver.findElement(getBy(elementIdentifier,identifierType)).click();
+                          driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
                           break;
             case "Write Text": Reporter.log("Writing text '"+parameter+"' to field with "+identifierType+" = '"+elementIdentifier+"'");
                               driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(parameter); 
@@ -71,10 +82,83 @@ public class CommandExecutor {
                                  break;
             case "Print": Reporter.log("Printing element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
                           printElement(elementIdentifier,elementType,identifierType);
+                                 break;
+            case "Compare Table": Reporter.log("Compare element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
+                          boolean isSame = compareElement(elementIdentifier,elementType,identifierType,parameter);
+                          assertEquals(isSame, true);
         }
     }
     
-    private By getBy(String identifier, String identifierType) {
+    private boolean compareElement(String elementIdentifier, String elementType,
+			String identifierType, String parameter) {
+    	boolean isSame = true;
+    	/*
+    	 * collect table from database using parameter as sql
+    	 */
+    	DBSQL jobwalker = new DBSQL("qatest.clarityssi.local","jobwalker","qauser","ClAr1ty!");
+    	System.out.println(parameter);
+    	ResultSet rs = jobwalker.getDBRow(parameter);
+    	ResultSetMetaData rsmd;
+		try {
+			rsmd = rs.getMetaData();
+			int colCount=rsmd.getColumnCount();
+			int j = 1;
+			for (WebElement row : driver.findElements(getBy(elementIdentifier+"> tr",identifierType))) {
+				int i = 1;
+				for (WebElement cell : row.findElements(getBy("td",identifierType))) {
+					String colType = rsmd.getColumnTypeName(i);
+					if(rs.isBeforeFirst()) rs.next();
+					String colAnswer = getAnswer(colType,i,rs);
+					if(!cell.getText().equalsIgnoreCase(colAnswer)) {
+						Reporter.log("Line " + j + " Found |" + cell.getText() + "| Should Be |" + colAnswer + "| Type is " + colType);
+						isSame=false;
+					}
+					if(i==colCount) break;
+					i++;
+				}
+				j++;
+				if(rs.isLast()) break;
+				rs.next();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		jobwalker.closeCon();
+		return isSame;
+	}
+   
+
+    /***
+     * extract sql data as type given in database and convert to string.
+     * @param colType
+     * @param i
+     * @param rs
+     * @return
+     */
+	private String getAnswer(String colType, int i, ResultSet rs) {
+		String answer = "";
+		try {
+				if(colType.contains("INT")) {
+					answer = String.valueOf(rs.getInt(i));
+				} else if(colType.contains("TIMESTAMP")) {
+					Date date = rs.getTimestamp(i);
+					if(date!=null) {
+					//if(date.after(new Date(10000))) {
+						answer = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a").format(date);
+					} else {
+						answer = " ";
+					}
+				} else {
+					answer = rs.getString(i);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return answer;
+	}
+
+	private By getBy(String identifier, String identifierType) {
         if (identifierType.contains("table")) {
             identifierType = identifierType.substring(0,identifierType.lastIndexOf('-'));
             char cellRow = identifier.charAt(identifier.lastIndexOf('(')+1);
@@ -102,6 +186,11 @@ public class CommandExecutor {
                 break;
             case "List":
                 for (WebElement e : driver.findElements(getBy(elementIdentifier+"> li",identifierType)))
+                    System.out.println(e.getText());
+                break;
+            case "Link":
+//                for (WebElement e : driver.findElements(getBy(elementIdentifier+"> a",identifierType)))
+                for (WebElement e : driver.findElements(getBy(elementIdentifier,identifierType)))
                     System.out.println(e.getText());
                 break;
             case "Table Header":
