@@ -157,16 +157,21 @@ public class CommandExecutor {
 			/*
 			 * non table block
 			 */
-			System.out.println("non-table search ");
 			ResultSet rs = masterIndex.getDBRow(parameter);
 			try {
-				String dbValue = rs.getString(0);
-				System.out.println("dbValue = " +dbValue);
-				System.out.println("GUIValue = " 
-				+ driver.findElement(getBy(elementIdentifier,identifierType)).getText());
-                assertTrue(driver.findElement(getBy(elementIdentifier,identifierType)).getText().contains(dbValue)); 
+				while(rs.isBeforeFirst()) {
+					rs.next();
+					String dbValue = rs.getString(1);
+					System.out.println("dbValue = " +dbValue);
+					System.out.println("GUIValue = " 
+						+ driver.findElement(getBy(elementIdentifier,identifierType)).getText());
+					Reporter.log(" Found |"
+							+ driver.findElement(getBy(elementIdentifier,identifierType)).getText()
+							+ "| Should Be |" + dbValue );
+					isSame= driver.findElement(getBy(elementIdentifier,identifierType)).
+							getText().contains(dbValue); 
+				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
