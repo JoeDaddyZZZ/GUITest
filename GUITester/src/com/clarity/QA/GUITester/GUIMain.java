@@ -26,7 +26,7 @@ public class GUIMain {
         suite.setName("Clarity GUI Test Suite");
         suite.addListener(guiClassPath + ".InitDriverListener");
 //        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
-        String[] fileArray = {"/Users/jgorski/Tests/API/firstGUITest.xlsx"};
+        String[] fileArray = {"/Users/jgorski/Tests/API/PreferencePortalTest.xlsx"};
         String fileName;
         if(args.length > 0) {
         	fileName = args[0];

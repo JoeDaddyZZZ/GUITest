@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -24,6 +26,10 @@ public class CommandExecutor {
     WebDriver driver;
     String baseWindowHdl = null;
     Map<String,String> paramMap = new HashMap<>();
+    String DBHost= "qatest.clarityssi.local";
+    String DBSchema= "fmi2";
+    String DBUser= "qauser";
+    String DBPassword= "ClAr1ty!";
     
     public CommandExecutor(WebDriver driver) {
         this.driver = driver;
@@ -46,8 +52,20 @@ public class CommandExecutor {
                               driver.get(parameter);
                               break;
             case "Click": Reporter.log("Clicking on element with "+identifierType+" = '"+elementIdentifier+"'");
-                          driver.findElement(getBy(elementIdentifier,identifierType)).click();
-                          driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+                          WebElement elem = driver.findElement(getBy(elementIdentifier,identifierType));
+                          if(elem.getTagName().equals("a")) {
+                        	  Reporter.log("Click href = " + elem.getAttribute("href"));
+                        	  driver.get(elem.getAttribute("href"));
+                          } else {
+                        	  elem.click();
+                          }
+                          if(parameter.isEmpty()) parameter ="0";
+            			  Thread.sleep(Integer.parseInt(parameter));
+                          break;
+            case "Sleep": Reporter.log("Sleeping for  "+parameter+" seconds ");
+                          if(parameter.isEmpty()) parameter ="0";
+            			  Thread.sleep(Integer.parseInt(parameter));
+                          System.out.println("Sleeping " + parameter);
                           break;
             case "Write Text": Reporter.log("Writing text '"+parameter+"' to field with "+identifierType+" = '"+elementIdentifier+"'");
                               driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(parameter); 
@@ -89,41 +107,71 @@ public class CommandExecutor {
         }
     }
     
-    private boolean compareElement(String elementIdentifier, String elementType,
-			String identifierType, String parameter) {
-    	boolean isSame = true;
-    	/*
-    	 * collect table from database using parameter as sql
-    	 */
-    	DBSQL jobwalker = new DBSQL("qatest.clarityssi.local","jobwalker","qauser","ClAr1ty!");
-    	System.out.println(parameter);
-    	ResultSet rs = jobwalker.getDBRow(parameter);
-    	ResultSetMetaData rsmd;
-		try {
-			rsmd = rs.getMetaData();
-			int colCount=rsmd.getColumnCount();
-			int j = 1;
-			for (WebElement row : driver.findElements(getBy(elementIdentifier+"> tr",identifierType))) {
-				int i = 1;
-				for (WebElement cell : row.findElements(getBy("td",identifierType))) {
-					String colType = rsmd.getColumnTypeName(i);
-					if(rs.isBeforeFirst()) rs.next();
-					String colAnswer = getAnswer(colType,i,rs);
-					if(!cell.getText().equalsIgnoreCase(colAnswer)) {
-						Reporter.log("Line " + j + " Found |" + cell.getText() + "| Should Be |" + colAnswer + "| Type is " + colType);
-						isSame=false;
+	private boolean compareElement(String elementIdentifier,
+			String elementType, String identifierType, String parameter) {
+		boolean isSame = true;
+		/*
+		 * collect table from database using parameter as sql
+		 */
+		DBSQL masterIndex = new DBSQL(this.DBHost, this.DBSchema, this.DBUser,
+				this.DBPassword);
+		System.out.println(parameter);
+		if (elementType.contains("Table")) {
+			System.out.println("table search ");
+			ResultSet rs = masterIndex.getDBRow(parameter);
+			ResultSetMetaData rsmd;
+			try {
+				rsmd = rs.getMetaData();
+				int colCount = rsmd.getColumnCount();
+				int j = 1;
+				for (WebElement row : driver.findElements(getBy(
+						elementIdentifier + "> tr", identifierType))) {
+					int i = 1;
+					for (WebElement cell : row.findElements(getBy("td",
+							identifierType))) {
+						String colType = rsmd.getColumnTypeName(i);
+						if (rs.isBeforeFirst())
+							rs.next();
+						String colAnswer = getAnswer(colType, i, rs);
+						if (!cell.getText().equalsIgnoreCase(colAnswer)) {
+							Reporter.log("Line " + j + " Found |"
+									+ cell.getText() + "| Should Be |"
+									+ colAnswer + "| Type is " + colType);
+							isSame = false;
+						}
+						if (i == colCount)
+							break;
+						i++;
 					}
-					if(i==colCount) break;
-					i++;
+					j++;
+					if (rs.isLast())
+						break;
+					rs.next();
 				}
-				j++;
-				if(rs.isLast()) break;
-				rs.next();
+				Reporter.log("Table Compared Lines  " + (j - 1));
+
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} else {
+			/*
+			 * non table block
+			 */
+			System.out.println("non-table search ");
+			ResultSet rs = masterIndex.getDBRow(parameter);
+			try {
+				String dbValue = rs.getString(0);
+				System.out.println("dbValue = " +dbValue);
+				System.out.println("GUIValue = " 
+				+ driver.findElement(getBy(elementIdentifier,identifierType)).getText());
+                assertTrue(driver.findElement(getBy(elementIdentifier,identifierType)).getText().contains(dbValue)); 
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
-		jobwalker.closeCon();
+		masterIndex.closeCon();
 		return isSame;
 	}
    
@@ -190,8 +238,14 @@ public class CommandExecutor {
                 break;
             case "Link":
 //                for (WebElement e : driver.findElements(getBy(elementIdentifier+"> a",identifierType)))
-                for (WebElement e : driver.findElements(getBy(elementIdentifier,identifierType)))
-                    System.out.println(e.getText());
+                for (WebElement e : driver.findElements(getBy(elementIdentifier,identifierType))) {
+                	System.out.println("Element "+ elementIdentifier + " " + identifierType);
+                	System.out.println("enabled "+ e.isEnabled());
+                	System.out.println("tag "+ e.getTagName());
+                	System.out.println("href "+ e.getAttribute("href"));
+                	System.out.println("class "+ e.getClass().getName());
+                    System.out.println("text " + e.getText());
+                }
                 break;
             case "Table Header":
                 for (WebElement e : driver.findElements(getBy(elementIdentifier+"> th",identifierType)))
@@ -201,6 +255,8 @@ public class CommandExecutor {
                 for (WebElement row : driver.findElements(getBy(elementIdentifier+"> tr",identifierType)))
                     for (WebElement cell : row.findElements(getBy("td",identifierType)))
                         System.out.println(cell.getText());
+            case "Page":
+                        System.out.println(driver.getPageSource());
                 break;
         }
     }
