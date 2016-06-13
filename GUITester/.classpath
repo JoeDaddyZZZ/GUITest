@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="lib/TestNG/testng-6.8.21.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-ooxml-3.13-20150929.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-2.37.0/selenium-java-2.37.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/selenium-java-2.53.0.jar"/>
 	<classpathentry kind="lib" path="lib/TestNG/reportng-1.1.4/reportng-1.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/bsh-1.3.0.jar"/>
@@ -127,5 +127,29 @@
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-scratchpad-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.27-bin.jar"/>
+	<classpathentry kind="lib" path="lib/Google/gson-2.2.4.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/APIData"/>
+	<classpathentry kind="lib" path="/Users/jgorski/Tests/API/Preference.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/bsh-2.0b4.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/commons-codec-1.10.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/commons-exec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/guava-19.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/hamcrest-library-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/httpclient-4.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/httpcore-4.4.3.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/httpmime-4.5.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/jcommander-1.48.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/jna-platform-4.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/netty-3.5.7.Final.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/phantomjsdriver-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/testng-6.9.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -67,6 +67,7 @@ public class InitDriverListener implements ISuiteListener {
             FirefoxBinary binary = new FirefoxBinary(new File(prop.getProperty("firefoxPath")));
             FirefoxProfile profile = new FirefoxProfile();
             driver = new FirefoxDriver(binary, profile);
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         }
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }

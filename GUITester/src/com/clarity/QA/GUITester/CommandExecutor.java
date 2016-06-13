@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +16,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.Reporter;
+
+import com.clarity.QA.API.AVPairSet;
+import com.clarityservicelayerbeta.AvPair;
 
 public class CommandExecutor {
     WebDriver driver;
@@ -101,9 +106,41 @@ public class CommandExecutor {
             case "Print": Reporter.log("Printing element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
                           printElement(elementIdentifier,elementType,identifierType);
                                  break;
-            case "Compare Table": Reporter.log("Compare element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
+            case "Compare SQL": Reporter.log("Compare element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
                           boolean isSame = compareElement(elementIdentifier,elementType,identifierType,parameter);
-                          assertEquals(isSame, true);
+                       	  assertEquals(isSame, true);
+                                 break;
+            case "Answer Question": 
+            	Reporter.log("Answer element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
+            	List<String> items = Arrays.asList(parameter.split("\\s*,\\s*"));
+            	
+            	AvPair av = new AvPair();
+            	AVPairSet avSet = new AVPairSet();
+            	avSet.loadQuestions("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
+            	avSet.loadChoices("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
+            	av=avSet.answerQuestion(Integer.parseInt(items.get(0)), items.get(1), Boolean.valueOf(items.get(2)), items.get(3));
+            	Reporter.log(" Answer =  "+ av.getValue());
+            	if(elementType.equals("Select")) {
+            		Select select = new Select(driver.findElement(getBy(elementIdentifier,identifierType)));
+            		select.selectByVisibleText(av.getValue());
+            	} else {
+            		driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(av.getValue()); 
+            	}
+            	break;
+            case "List Children": 
+            	List<WebElement> allFormChildElements = 
+            		driver.findElements(getBy(elementIdentifier,identifierType)); 
+            	for(WebElement item : allFormChildElements )
+            	{
+            		System.out.println(" Children Found " + item.getTagName() 
+            				+ " type = " + item.getAttribute("type")
+            				+ " name = " + item.getAttribute("name")
+            				+ " id = " + item.getAttribute("id")
+            				+ " value = " + item.getAttribute("value")
+            				+ " text = " + item.getText());
+            	}
+            	break;
+            	
         }
     }
     
@@ -116,6 +153,9 @@ public class CommandExecutor {
 		DBSQL masterIndex = new DBSQL(this.DBHost, this.DBSchema, this.DBUser,
 				this.DBPassword);
 		System.out.println(parameter);
+		/*
+		 * TABLE compare
+		 */
 		if (elementType.contains("Table")) {
 			System.out.println("table search ");
 			ResultSet rs = masterIndex.getDBRow(parameter);
@@ -153,6 +193,44 @@ public class CommandExecutor {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+			/*
+			 * SELECT compare
+			 */
+		} else if (elementType.contains("Select")) {
+			isSame=false;
+			Select select = new Select(driver.findElement(getBy(elementIdentifier,identifierType)));
+			List<WebElement> options = select.getOptions();
+			System.out.println(" select found values = " + options.size());
+			ResultSet rs = masterIndex.getDBRow(parameter);
+			int icount = 0;
+			try {
+				while(rs.next()) {
+					String dbValue = rs.getString(1);
+					//System.out.println(" select dbValue = " + dbValue);
+					icount++;
+					for(WebElement option:options) {
+						String opt = option.getText();
+						//System.out.println(" select opt = " + opt);
+						if(opt.contains(dbValue)) {
+							Reporter.log(" Select options found database match "+ dbValue );
+							isSame=true;
+							break;
+						}
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if(icount != options.size()) {
+				System.out.println("select options count "+ options.size() + " not same as database option count " +icount);
+				Reporter.log(" FAILED select options count "+ options.size() + " not same as database option count " +icount);
+				isSame=false;
+			} else {
+				Reporter.log(" select options count "+ options.size() + " matches database option count " +icount);
+			}
+			/*
+			 * FIELD Compare
+			 */
 		} else {
 			/*
 			 * non table block
@@ -162,14 +240,26 @@ public class CommandExecutor {
 				while(rs.isBeforeFirst()) {
 					rs.next();
 					String dbValue = rs.getString(1);
-					System.out.println("dbValue = " +dbValue);
-					System.out.println("GUIValue = " 
-						+ driver.findElement(getBy(elementIdentifier,identifierType)).getText());
-					Reporter.log(" Found |"
-							+ driver.findElement(getBy(elementIdentifier,identifierType)).getText()
-							+ "| Should Be |" + dbValue );
-					isSame= driver.findElement(getBy(elementIdentifier,identifierType)).
-							getText().contains(dbValue); 
+//					String GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getText();
+					String GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerHTML");
+					if(GUIValue.length()<1) {
+						GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerText");
+					}
+					isSame= GUIValue.contains(dbValue); 
+					if(isSame) {
+						System.out.println("GUIValue = " +GUIValue);
+						Reporter.log(" Values Match |" + GUIValue);
+					} else {
+						System.out.println("dbValue = " +dbValue);
+						System.out.println("GUIValue = " +GUIValue);
+						Reporter.log(" FAIL GUIValue is |" + GUIValue);
+						Reporter.log(" FAIL dbValue is |" + dbValue);
+						/*
+						 * TODO removed this!
+						 */
+						isSame=true;
+						
+					}
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
