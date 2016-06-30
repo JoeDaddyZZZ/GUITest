@@ -1,6 +1,5 @@
 package com.clarity.QA.GUITester;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -13,11 +12,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -36,32 +33,83 @@ public class CommandExecutor {
     String DBUser= "qauser";
     String DBPassword= "ClAr1ty!";
     
+    HashMap<String,String> varsToUse = new HashMap<String,String>();
+    
     public CommandExecutor(WebDriver driver) {
         this.driver = driver;
-        baseWindowHdl = driver.getWindowHandle();
+        System.out.println(driver.getTitle());
+		baseWindowHdl = driver.getWindowHandle();
+		varsToUse.put("XXXYYYZZZ", "");
     }
     
     public void execute(List<String> params) throws Exception {
+    	Thread.sleep(3);
+		varsToUse.put("XXXYYYZZZ", "");
         String command = params.get(0);
         //System.out.println(" command " + command);
-        String elementIdentifier = params.get(1);
+        String elementIdentifier = (params.get(1) != null) ? params.get(1) : " ";
         //System.out.println(" elementId " + elementIdentifier);
-        String elementType = params.get(2);
+ //       String elementType = params.get(2);
+        String elementType = (params.get(2) != null) ? params.get(2) : " ";
         //System.out.println(" elementType " + elementType);
-        String identifierType = params.get(3);
+        String identifierType = (params.get(3) != null) ? params.get(3) : " ";
         //System.out.println(" identifierType " + identifierType);
-        String parameter = params.get(4);
+        String parameter = (params.get(4) != null) ? params.get(4) : " ";
         //System.out.println(" parameter " + parameter);
+        /*
+         * set question/answer data
+         */
+       	AVPairSet avSet = new AVPairSet();
+       	avSet.loadQuestions("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
+       	avSet.loadChoices("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
+        /*
+         * loop through collected variables stored and replace
+         */
+        for (String varKey : varsToUse.keySet()) {
+        	if(parameter.contains(varKey)) {
+        		String p = parameter.replaceAll(varKey,varsToUse.get(varKey));
+        		parameter = p;
+//        		System.out.println(" replaced in parameter " + parameter);
+        	}
+        }
+   		//System.out.println(" replaced in parameters count " + varsToUse.size());
         switch(command) {
+        	case "Variable": varsToUse.put(elementIdentifier, parameter);
+        				break;
             case "Access URL": Reporter.log("Acessing URL: '"+parameter+"'");
-                              driver.get(parameter);
-                              break;
+                        driver.get(parameter);
+                        break;
             case "Click": Reporter.log("Clicking on element with "+identifierType+" = '"+elementIdentifier+"'");
                           WebElement elem = driver.findElement(getBy(elementIdentifier,identifierType));
                           if(elem.getTagName().equals("a")) {
                         	  Reporter.log("Click href = " + elem.getAttribute("href"));
                         	  driver.get(elem.getAttribute("href"));
+                          } else if(elementType.contains("odal")) {
+                        	  /*
+                        	   * code to open and switch to modal
+                        	   */
+                        	 driver.findElement(getBy(elementIdentifier,identifierType)).click();
+                              String parent = driver.getWindowHandle();
+                        	  System.out.println(" Switching to Modal " + parent);
+                        	  Reporter.log(" Switching to Modal " + parent);
+    //                          WebDriverWait wait = new WebDriverWait(driver, 10);
+     //                         WebElement push_to_create = wait.until(ExpectedConditions.elementToBeClickable(
+      //                              		  getBy(elementIdentifier,identifierType) ));
+                  //            push_to_create.click();
+                              waitForWindow(driver);
+                              switchToModalDialog(driver, parent);
+                          } else if(elementType.contains("ox")) {
+                       		  System.out.println("Box ");
+                        	  List<WebElement> oCheckBox = driver.findElements( getBy(elementIdentifier,identifierType) );
+                        	  for(WebElement box:oCheckBox) {
+                        		  System.out.println("Box Option "+ box.getTagName() + " : "+ box.getText() +  " value " + box.getAttribute("value"));
+                        		  if(box.getAttribute("value").contains(parameter)) {
+                        			  box.click();
+                        			  break;
+                        		  }
+                        	  }
                           } else {
+                        	  System.out.println("Click Element "+ elem.getTagName() + " " + elem.getAttribute("name"));
                         	  elem.click();
                           }
                           if(parameter.isEmpty()) parameter ="0";
@@ -69,10 +117,12 @@ public class CommandExecutor {
                           break;
             case "Sleep": Reporter.log("Sleeping for  "+parameter+" seconds ");
                           if(parameter.isEmpty()) parameter ="0";
-            			  Thread.sleep(Integer.parseInt(parameter));
+                          driver.manage().timeouts().implicitlyWait(Integer.parseInt(parameter), TimeUnit.SECONDS);
+            			  //Thread.sleep(Integer.parseInt(parameter));
                           System.out.println("Sleeping " + parameter);
                           break;
             case "Write Text": Reporter.log("Writing text '"+parameter+"' to field with "+identifierType+" = '"+elementIdentifier+"'");
+                              driver.findElement(getBy(elementIdentifier,identifierType)).clear();
                               driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(parameter); 
                               break;
             case "Check URL": Reporter.log("Verifying Current URL = '"+parameter+"'");
@@ -82,13 +132,25 @@ public class CommandExecutor {
                                assertEquals(driver.findElement(getBy(elementIdentifier,identifierType)).getText(),parameter); 
                                break;  
             case "Has Text": Reporter.log("Verifying element with "+identifierType+" = '"+elementIdentifier+"' has text = '"+parameter+"'");
-                               assertTrue(driver.findElement(getBy(elementIdentifier,identifierType)).getText().contains(parameter)); 
+                               String textFound = driver.findElement(getBy(elementIdentifier,identifierType)).getText(); 
+                               if(textFound.length() < 1) {
+                            	   textFound = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerHTML");
+                               }
+                               if(textFound.length() < 1) {
+                            	   textFound = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerText");
+                               }
+                               if(textFound.length() < 1) {
+                            	   textFound = driver.switchTo().activeElement().getAttribute("id");
+                               }
+            					Reporter.log("Found element with "+identifierType+" = '"+elementIdentifier+"' with text = '"+textFound+"'");
+                               assertTrue(textFound.contains(parameter)); 
                                break;  
             case "Get Text": Reporter.log("Saving text with "+identifierType+" = '"+elementIdentifier+"' to variable name = '"+parameter+"'");
                              paramMap.put(parameter, driver.findElement(getBy(elementIdentifier,identifierType)).getText());
                              break;
             case "Write Saved Text": String savedText = paramMap.get(parameter);
                                      Reporter.log("Writing text '"+savedText+"' to field with "+identifierType+" = '"+elementIdentifier+"'");
+                                     driver.findElement(getBy(elementIdentifier,identifierType)).clear();
                                      driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(savedText);
                                      break;
             case "Check Saved Text": String savedText2 = paramMap.get(parameter);
@@ -113,17 +175,17 @@ public class CommandExecutor {
             case "Answer Question": 
             	Reporter.log("Answer element of type "+elementType+" with "+identifierType+" = '"+elementIdentifier);
             	List<String> items = Arrays.asList(parameter.split("\\s*,\\s*"));
-            	
             	AvPair av = new AvPair();
-            	AVPairSet avSet = new AVPairSet();
-            	avSet.loadQuestions("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
-            	avSet.loadChoices("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
-            	av=avSet.answerQuestion(Integer.parseInt(items.get(0)), items.get(1), Boolean.valueOf(items.get(2)), items.get(3));
-            	Reporter.log(" Answer =  "+ av.getValue());
+            	String newParameter = items.get(3);
+            	if(items.get(3).equals("\"MAX\"")) newParameter = "MAX";
+            	if(items.get(3).equals("\"MIN\"")) newParameter = "MIN";
+            	av=avSet.answerQuestion(Integer.parseInt(items.get(0)), items.get(1), Boolean.valueOf(items.get(2)), newParameter);
+            	Reporter.log(" Answer =  "+ av.getValue() + " sent " + items.get(3));
             	if(elementType.equals("Select")) {
             		Select select = new Select(driver.findElement(getBy(elementIdentifier,identifierType)));
-            		select.selectByVisibleText(av.getValue());
+            		select.selectByValue(av.getValue());
             	} else {
+            		driver.findElement(getBy(elementIdentifier,identifierType)).clear();
             		driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(av.getValue()); 
             	}
             	break;
@@ -152,7 +214,9 @@ public class CommandExecutor {
 		 */
 		DBSQL masterIndex = new DBSQL(this.DBHost, this.DBSchema, this.DBUser,
 				this.DBPassword);
-		System.out.println(parameter);
+		//System.out.println(this.DBHost + " " +  this.DBSchema + " " +  this.DBUser + " " +
+				//this.DBPassword);
+		//System.out.println(parameter);
 		/*
 		 * TABLE compare
 		 */
@@ -200,17 +264,22 @@ public class CommandExecutor {
 			isSame=false;
 			Select select = new Select(driver.findElement(getBy(elementIdentifier,identifierType)));
 			List<WebElement> options = select.getOptions();
-			System.out.println(" select found values = " + options.size());
+			//System.out.println(" select found values = " + options.size());
 			ResultSet rs = masterIndex.getDBRow(parameter);
-			int icount = 0;
+			int sqlCount = 0;
+			int optionCount = 0;
+			for(WebElement option:options) {
+				if(option.getText().length()>0) optionCount++;
+			}
 			try {
+				//System.out.println("Select DB "+ rs.getFetchSize() + " " + parameter);
 				while(rs.next()) {
 					String dbValue = rs.getString(1);
 					//System.out.println(" select dbValue = " + dbValue);
-					icount++;
+					sqlCount++;
 					for(WebElement option:options) {
 						String opt = option.getText();
-						//System.out.println(" select opt = " + opt);
+						//System.out.println(" select opt = |" + opt +"|");
 						if(opt.contains(dbValue)) {
 							Reporter.log(" Select options found database match "+ dbValue );
 							isSame=true;
@@ -221,12 +290,12 @@ public class CommandExecutor {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			if(icount != options.size()) {
-				System.out.println("select options count "+ options.size() + " not same as database option count " +icount);
-				Reporter.log(" FAILED select options count "+ options.size() + " not same as database option count " +icount);
+			if(sqlCount != optionCount) {
+				System.out.println("select options count "+ optionCount + " not same as database option count " +sqlCount);
+				Reporter.log(" FAILED select options count "+ optionCount + " not same as database option count " +sqlCount);
 				isSame=false;
 			} else {
-				Reporter.log(" select options count "+ options.size() + " matches database option count " +icount);
+				Reporter.log(" select options count "+ optionCount + " matches database option count " +sqlCount);
 			}
 			/*
 			 * FIELD Compare
@@ -235,31 +304,41 @@ public class CommandExecutor {
 			/*
 			 * non table block
 			 */
+			isSame=false;
+			boolean isBeforeFirst = true;
 			ResultSet rs = masterIndex.getDBRow(parameter);
 			try {
+				//System.out.println("Field DB "+ rs.getFetchSize() + " " + parameter);
 				while(rs.isBeforeFirst()) {
+					isBeforeFirst = false;
 					rs.next();
 					String dbValue = rs.getString(1);
-//					String GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getText();
-					String GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerHTML");
-					if(GUIValue.length()<1) {
-						GUIValue = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerText");
+					//System.out.println("dbValue = " +dbValue);
+					String GUIValueA = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerHTML");
+					if(GUIValueA.length()<1) {
+						GUIValueA = driver.findElement(getBy(elementIdentifier,identifierType)).getAttribute("innerText");
 					}
+					if(GUIValueA.length()<1) {
+						//System.out.println(" FAIL GUIValue = " +GUIValueA);
+						Reporter.log(" FAIL GUIValue is empty |" + GUIValueA);
+					}
+					String GUIValueB = GUIValueA.replace("amp;", "");
+					String GUIValueC = GUIValueB.replace("&gt;", ">");
+					String GUIValue = GUIValueC.replace("&lt;", "<");
 					isSame= GUIValue.contains(dbValue); 
 					if(isSame) {
-						System.out.println("GUIValue = " +GUIValue);
+						//System.out.println("GUIValue = " +GUIValue);
 						Reporter.log(" Values Match |" + GUIValue);
 					} else {
-						System.out.println("dbValue = " +dbValue);
-						System.out.println("GUIValue = " +GUIValue);
+						//System.out.println("dbValue = " +dbValue);
+						//System.out.println("GUIValue = " +GUIValue);
 						Reporter.log(" FAIL GUIValue is |" + GUIValue);
 						Reporter.log(" FAIL dbValue is |" + dbValue);
-						/*
-						 * TODO removed this!
-						 */
-						isSame=true;
-						
 					}
+				}
+				if(isBeforeFirst) {
+					System.out.println("No query run " + parameter);
+					Reporter.log("No query run " + parameter);
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -307,7 +386,7 @@ public class CommandExecutor {
             char cellRow = identifier.charAt(identifier.lastIndexOf('(')+1);
             char cellCol = identifier.charAt(identifier.lastIndexOf(')')-1);
             identifier = identifier.substring(0,identifier.lastIndexOf('(')) + " > tbody > tr:nth-child("+cellRow+") > td:nth-child("+cellCol+")";
-            System.out.println(identifierType +", "+identifier);
+            //System.out.println(identifierType +", "+identifier);
         }
         switch(identifierType) {
             case "id": return By.id(identifier);
@@ -355,5 +434,87 @@ public class CommandExecutor {
                 break;
         }
     }
-  
+    public static void waitForWindow(WebDriver driver)
+            throws InterruptedException {
+        //wait until number of window handles become 2 or until 6 seconds are completed.
+        int timecount = 1;
+        do {
+            driver.getWindowHandles();
+            Thread.sleep(200);
+            timecount++;
+            if (timecount > 30) {
+                break;
+            }
+        } while (driver.getWindowHandles().size() != 2);
+
+    }
+
+    public static void switchToModalDialog(WebDriver driver, String parent) { 
+            //Switch to Modal dialog
+        System.out.println(" Looking for Modal dialogs  " + driver.getWindowHandles().size());
+        if (driver.getWindowHandles().size() == 2) {
+            for (String window : driver.getWindowHandles()) {
+            	System.out.println(" Looking for Modal dialog " + driver.getWindowHandle());
+                if (!window.equals(parent)) {
+                    driver.switchTo().window(window);
+                    System.out.println("Modal dialog found");
+                    Reporter.log("Modal dialog found");
+                    break;
+                }
+            }
+        }
+    }
+    
+    public void closeDriver() {
+    	driver.quit();
+    }
+
+	public WebDriver getDriver() {
+		return driver;
+	}
+
+	public void setDriver(WebDriver driver) {
+		this.driver = driver;
+	}
+
+	public String getDBHost() {
+		return DBHost;
+	}
+
+	public void setDBHost(String dBHost) {
+		DBHost = dBHost;
+	}
+
+	public String getDBSchema() {
+		return DBSchema;
+	}
+
+	public void setDBSchema(String dBSchema) {
+		DBSchema = dBSchema;
+	}
+
+	public String getDBUser() {
+		return DBUser;
+	}
+
+	public void setDBUser(String dBUser) {
+		DBUser = dBUser;
+	}
+
+	public String getDBPassword() {
+		return DBPassword;
+	}
+
+	public void setDBPassword(String dBPassword) {
+		DBPassword = dBPassword;
+	}
+
+	public HashMap<String, String> getVarsToUse() {
+		return varsToUse;
+	}
+
+	public void setVarsToUse(HashMap<String, String> varsToUse) {
+		if(varsToUse != null) this.varsToUse = varsToUse;
+	}
+    
 }

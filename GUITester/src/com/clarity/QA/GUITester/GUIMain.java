@@ -8,7 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.poi.POIXMLDocument;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.testng.TestNG;
 import org.testng.xml.XmlClass;
@@ -21,58 +23,103 @@ public class GUIMain {
 	static String guiClassPath = "com.clarity.QA.GUITester";
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
+			List<XmlSuite> suites = new ArrayList<>();
         
-        XmlSuite suite = new XmlSuite();
-        suite.setName("Clarity GUI Test Suite");
-        suite.addListener(guiClassPath + ".InitDriverListener");
 //        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
-        String[] fileArray = {"/Users/jgorski/Tests/API/PreferencePortalTest.xlsx"};
-        String fileName;
+        String[] fileArray = {
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinSpanish.xlsx",
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxSpanish.xlsx",
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxFrench.xlsx",
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMinFrench.xlsx",
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
+        	//	"/Users/jgorski/Tests/API/PreferencePortalNegativeMinEnglish.xlsx"
+        		};
+        //String fileName;
         if(args.length > 0) {
-        	fileName = args[0];
+        	//fileName = args[0];
         	fileArray = args;
-        } else {
-        	fileName = fileArray[0];
+        //} else {
+        	//fileName = fileArray[0];
         }
-        File testFile = new File(fileName);
-        System.out.println("Running test suite with file: "+testFile.getAbsolutePath());
-        FileInputStream file = new FileInputStream(testFile);
-        if (".csv".equals(fileName.substring(fileName.lastIndexOf('.')))) {
-            for (String name : fileArray) {
-                XmlTest newTest = new XmlTest(suite);
-                newTest.setName(name.substring(0,name.lastIndexOf('.'))+" Test");
-                List<XmlClass> testClasses = new ArrayList<>();
-                testClasses.add(new XmlClass(guiClassPath+".TestCreator"));
-                newTest.setXmlClasses(testClasses);
-                newTest.addParameter("fileName",name.substring(name.lastIndexOf("\\")+1, name.length()));
-            }
-        } else if (".xlsx".equals(fileName.substring(fileName.lastIndexOf('.')))){
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
-            for (int i=0;i<workbook.getNumberOfSheets();i++) {
-                String sheetName = workbook.getSheetAt(i).getSheetName();
-                XmlTest newTest = new XmlTest(suite);
-                newTest.setName(sheetName+" Test");
-                List<XmlClass> testClasses = new ArrayList<>();
-                testClasses.add(new XmlClass(guiClassPath+".TestCreator"));
-                newTest.setXmlClasses(testClasses);
-                newTest.addParameter("fileName",fileName);
-                newTest.addParameter("sheetName", sheetName);
-            }
-        } else {
-            System.out.println("Invalid test file format. Only .csv and .xlsx formats are accepted.");
-            return;
-        }
-        List<XmlSuite> suites = new ArrayList<>();
-        suites.add(suite);
+		/*
+		 * initialize suite 
+		 */
+		for (String fileName : fileArray) {
+			XmlSuite suite = new XmlSuite();
+			suite.addListener(guiClassPath + ".InitDriverListener");
+			suite.setName("Clarity GUI " + fileName);
+			File testFile = new File(fileName);
+			System.out.println("Running test suite with file: "
+					+ testFile.getAbsolutePath());
+			FileInputStream file = new FileInputStream(testFile);
+			if (".csv".equals(fileName.substring(fileName.lastIndexOf('.')))) {
+				for (String name : fileArray) {
+					XmlTest newTest = new XmlTest(suite);
+					newTest.setName(name.substring(0, name.lastIndexOf('.'))
+							+ " Test");
+					List<XmlClass> testClasses = new ArrayList<>();
+					testClasses.add(new XmlClass(guiClassPath + ".TestCreator"));
+					newTest.setXmlClasses(testClasses);
+					newTest.addParameter(
+							"fileName",
+							name.substring(name.lastIndexOf("\\") + 1,
+							name.length()));
+				}
+			} else if (".xlsx".equals(fileName.substring(fileName
+					.lastIndexOf('.')))) {
+				XSSFWorkbook workbook = new XSSFWorkbook(file);
+				for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+					String sheetName = workbook.getSheetAt(i).getSheetName();
+					XmlTest newTest = new XmlTest(suite);
+					newTest.setName(testFile.getName() + " " + sheetName
+							+ " Test");
+					List<XmlClass> testClasses = new ArrayList<>();
+					testClasses.add(new XmlClass(guiClassPath + ".TestCreator"));
+					newTest.setXmlClasses(testClasses);
+					newTest.addParameter("fileName", fileName);
+					newTest.addParameter("sheetName", sheetName);
+				}
+			} else {
+				System.out
+						.println("Invalid test file format. Only .csv and .xlsx formats are accepted.");
+				return;
+			}
+			file.close();
+			suites.add(suite);
+		}
+		/*
+		 * process properties
+		 */
+		String platform = null;
+	        FileInputStream input = null;
+			try {
+				Properties prop = new Properties();
+//	            input = new FileInputStream("/Users/jgorski/Tests/GUI/conf.properties");
+	            input = new FileInputStream("res/conf.properties");
+				prop.load(input);
+	            platform = prop.getProperty("useDriver");
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        } finally {
+	            if (input != null) {
+	                try {
+	                    input.close();
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        }
         /*
          * run suites
          */
         TestNG tng = new TestNG();
         tng.setUseDefaultListeners(false);
+		//tng.addListener(guiClassPath + ".InitDriverListener");
         tng.addListener(new HTMLReporter());
         tng.addListener(new JUnitXMLReporter());
         tng.setXmlSuites(suites);
-        tng.setOutputDirectory("output/results/"+new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(new Date()));
+        tng.setOutputDirectory("output/results/"+new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(new Date())+platform);
         tng.run();
     }
     

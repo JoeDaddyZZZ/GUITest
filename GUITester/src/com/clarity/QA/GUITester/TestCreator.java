@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -17,14 +19,21 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-
 public class TestCreator {
+	
+    static HashMap<String,String> masterVarsToUse = new HashMap<String,String>();
+    static HashMap<String,HashMap<String,String>> fileMasterVars = new HashMap<String,HashMap<String,String>>();
+//    HashMap<String,String> masterVarsToUse = new HashMap<String,String>();
+        WebDriver driver;
     
     @Test(description="Generate test from spreadsheet")
     @Parameters({"fileName","sheetName"})
-    public static void runTest(String fileName, @Optional String sheetName) throws Exception {
+//    public static void runTest(String fileName, @Optional String sheetName) throws Exception {
+    public void runTest(String fileName, @Optional String sheetName) throws Exception {
+    	System.out.println(" Initialize Listener within test " + sheetName);
         WebDriver driver = InitDriverListener.getDriver();
         CommandExecutor executor = new CommandExecutor(driver);
+        executor.setVarsToUse(fileMasterVars.get(fileName));
         if (".csv".equals(fileName.substring(fileName.lastIndexOf('.')))) {
             String line = "";
             BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
@@ -64,6 +73,15 @@ public class TestCreator {
                     throw e;
                 }
             }
+            workbook.close();
         }
+        masterVarsToUse = executor.getVarsToUse();
+        fileMasterVars.put(fileName, masterVarsToUse);
+        //executor.closeDriver();
     }
+
+	private WebDriver getDriver() {
+		// TODO Auto-generated method stub
+		return driver;
+	}
 }

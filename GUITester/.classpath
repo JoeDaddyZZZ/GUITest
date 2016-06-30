@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="lib/TestNG/testng-6.8.21.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/poi-ooxml-3.13-20150929.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.53.0/selenium-java-2.53.0.jar"/>
@@ -36,11 +35,9 @@
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/nekohtml-1.9.19.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/netty-3.5.7.Final.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/operadriver-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/phantomjsdriver-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/protobuf-java-2.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/sac-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/serializer-2.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/testng-6.8.5.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/xercesImpl-2.10.0.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.37.0/libs/xml-apis-1.4.01.jar"/>
@@ -128,6 +125,9 @@
 	<classpathentry kind="lib" path="lib/Apache/poi-3.13/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.27-bin.jar"/>
 	<classpathentry kind="lib" path="lib/Google/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="lib/Selenium/selendroid-standalone-0.17.0-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="lib/TestNG/testng-6.9.13-20160623.031634-4-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/TestNG/testng-6.9.13-20160623.031634-4.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/APIData"/>
 	<classpathentry kind="lib" path="/Users/jgorski/Tests/API/Preference.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/apache-mime4j-0.6.jar"/>
@@ -150,6 +150,6 @@
 	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/netty-3.5.7.Final.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/phantomjsdriver-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-2.53.0/libs/testng-6.9.9.jar"/>
+	<classpathentry kind="lib" path="/Users/jgorski/Tests/GUI/ios-server-0.6.5-jar-with-dependencies.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
