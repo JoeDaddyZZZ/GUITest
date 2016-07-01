@@ -28,11 +28,11 @@ public class GUIMain {
 //        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
         String[] fileArray = {
         		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinSpanish.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxSpanish.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxFrench.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMinFrench.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxSpanish.xlsx",
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxFrench.xlsx",
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinFrench.xlsx",
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
+        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
         	//	"/Users/jgorski/Tests/API/PreferencePortalNegativeMinEnglish.xlsx"
         		};
         //String fileName;

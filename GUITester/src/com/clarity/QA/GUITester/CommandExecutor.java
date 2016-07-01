@@ -98,11 +98,13 @@ public class CommandExecutor {
                   //            push_to_create.click();
                               waitForWindow(driver);
                               switchToModalDialog(driver, parent);
+                              driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
                           } else if(elementType.contains("ox")) {
                        		  System.out.println("Box ");
                         	  List<WebElement> oCheckBox = driver.findElements( getBy(elementIdentifier,identifierType) );
                         	  for(WebElement box:oCheckBox) {
                         		  System.out.println("Box Option "+ box.getTagName() + " : "+ box.getText() +  " value " + box.getAttribute("value"));
+                        		  Reporter.log("Box Option "+ box.getTagName() + " : "+ box.getText() +  " value " + box.getAttribute("value"));
                         		  if(box.getAttribute("value").contains(parameter)) {
                         			  box.click();
                         			  break;
@@ -455,10 +457,12 @@ public class CommandExecutor {
         if (driver.getWindowHandles().size() == 2) {
             for (String window : driver.getWindowHandles()) {
             	System.out.println(" Looking for Modal dialog " + driver.getWindowHandle());
-                if (!window.equals(parent)) {
+//                if (!window.equals(parent)) {
+                if (window.equals(parent)) {
                     driver.switchTo().window(window);
-                    System.out.println("Modal dialog found");
-                    Reporter.log("Modal dialog found");
+                    System.out.println("Modal dialog found " + driver.getWindowHandle());
+                    Reporter.log("Modal dialog found " + driver.getWindowHandle());
+                    //System.out.println(driver.getPageSource());
                     break;
                 }
             }
