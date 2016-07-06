@@ -25,6 +25,8 @@ import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.safari.SafariOptions;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 import org.uiautomation.ios.IOSCapabilities;
@@ -115,6 +117,10 @@ public class InitDriverListener implements ISuiteListener {
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}
+        } else if (useDriver.contains("Safari")) {
+        	SafariOptions options = new SafariOptions();
+        	 options.setUseCleanSession(true);
+        	driver = new SafariDriver(options);
         }
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
