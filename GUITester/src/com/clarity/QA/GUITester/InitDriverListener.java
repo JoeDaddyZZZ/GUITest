@@ -21,6 +21,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.CapabilityType;
@@ -84,6 +85,18 @@ public class InitDriverListener implements ISuiteListener {
             FirefoxBinary binary = new FirefoxBinary(new File(prop.getProperty("firefoxPath")));
             FirefoxProfile profile = new FirefoxProfile();
             driver = new FirefoxDriver(binary, profile);
+            driver.get("https://www.clarityssi.com/");
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        } else if (useDriver.contains("IEWin32")) {
+        	File IEexeFile = new File(prop.getProperty("IEWin32Path"));
+        	System.setProperty("webdriver.ie.driver",IEexeFile.getAbsolutePath());
+            driver = new InternetExplorerDriver();
+            driver.get("https://www.clarityssi.com/");
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        } else if (useDriver.contains("IEx64")) {
+        	File IEexeFile = new File(prop.getProperty("IEx64Path"));
+        	System.setProperty("webdriver.ie.driver",IEexeFile.getAbsolutePath());
+            driver = new InternetExplorerDriver();
             driver.get("https://www.clarityssi.com/");
             driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         } else if (useDriver.contains("Chrome")) {
