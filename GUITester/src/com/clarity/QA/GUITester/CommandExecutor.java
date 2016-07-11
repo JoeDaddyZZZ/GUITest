@@ -31,12 +31,24 @@ public class CommandExecutor {
     String DBHost= "qatest.clarityssi.local";
     String DBSchema= "fmi2";
     String DBUser= "qauser";
-    String DBPassword= "ClAr1ty!";
+//    String DBPassword= "ClAr1ty!";
+    String DBPassword= "";
     
     HashMap<String,String> varsToUse = new HashMap<String,String>();
     
     public CommandExecutor(WebDriver driver) {
         this.driver = driver;
+        System.out.println(driver.getTitle());
+		baseWindowHdl = driver.getWindowHandle();
+		varsToUse.put("XXXYYYZZZ", "");
+    }
+    public CommandExecutor(WebDriver driver, 
+    		String DBHost, String DBSchema, String DBUser, String DBPassword) {
+        this.driver = driver;
+        this.DBHost = DBHost;
+        this.DBSchema = DBSchema;
+        this.DBUser = DBUser;
+        this.DBPassword = DBPassword;
         System.out.println(driver.getTitle());
 		baseWindowHdl = driver.getWindowHandle();
 		varsToUse.put("XXXYYYZZZ", "");
@@ -182,13 +194,15 @@ public class CommandExecutor {
             	if(items.get(3).equals("\"MAX\"")) newParameter = "MAX";
             	if(items.get(3).equals("\"MIN\"")) newParameter = "MIN";
             	av=avSet.answerQuestion(Integer.parseInt(items.get(0)), items.get(1), Boolean.valueOf(items.get(2)), newParameter);
-            	Reporter.log(" Answer =  "+ av.getValue() + " sent " + items.get(3));
+            	String answer = av.getValue();
+           		if(answer==null || answer.isEmpty()) answer=".";
+            	Reporter.log(" Answer =  "+ answer + " for " + items.get(3));
             	if(elementType.equals("Select")) {
             		Select select = new Select(driver.findElement(getBy(elementIdentifier,identifierType)));
-            		select.selectByValue(av.getValue());
+           			select.selectByValue(answer);
             	} else {
             		driver.findElement(getBy(elementIdentifier,identifierType)).clear();
-            		driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(av.getValue()); 
+            		driver.findElement(getBy(elementIdentifier,identifierType)).sendKeys(answer); 
             	}
             	break;
             case "List Children": 
@@ -406,7 +420,9 @@ public class CommandExecutor {
         switch (elementType) {
             case "Div":
                 WebElement div = driver.findElement(getBy(elementIdentifier,identifierType));
-                System.out.println(div.getText());
+                String textOut = div.getText();
+                System.out.println(textOut);
+                Reporter.log(textOut);
                 break;
             case "List":
                 for (WebElement e : driver.findElements(getBy(elementIdentifier+"> li",identifierType)))

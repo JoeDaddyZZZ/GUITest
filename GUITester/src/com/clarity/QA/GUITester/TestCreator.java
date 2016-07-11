@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -30,9 +31,13 @@ public class TestCreator {
     @Parameters({"fileName","sheetName"})
 //    public static void runTest(String fileName, @Optional String sheetName) throws Exception {
     public void runTest(String fileName, @Optional String sheetName) throws Exception {
+        Properties prop = new Properties();
+        prop = InitDriverListener.readProps("res/conf.properties");
     	System.out.println(" Initialize Listener within test " + sheetName);
         WebDriver driver = InitDriverListener.getDriver();
-        CommandExecutor executor = new CommandExecutor(driver);
+        CommandExecutor executor = new CommandExecutor(driver,prop.getProperty("DBHost")
+        		,prop.getProperty("DBSchema"),prop.getProperty("DBUser")
+        		,prop.getProperty("DBPassword"));
         executor.setVarsToUse(fileMasterVars.get(fileName));
         if (".csv".equals(fileName.substring(fileName.lastIndexOf('.')))) {
             String line = "";

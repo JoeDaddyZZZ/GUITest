@@ -32,8 +32,8 @@ public class GUIMain {
       //  		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxFrench.xlsx",
        // 		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinFrench.xlsx",
         //		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
-        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
-        		//"/Users/jgorski/Tests/API/PreferencePortalNegativeMinEnglish.xlsx"
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
+        		"/Users/jgorski/Tests/API/PreferencePortalNegativeMinEnglish.xlsx"
         		};
         //String fileName;
         if(args.length > 0) {
@@ -92,24 +92,10 @@ public class GUIMain {
 		 * process properties
 		 */
 		String platform = null;
-	        FileInputStream input = null;
-			try {
-				Properties prop = new Properties();
-//	            input = new FileInputStream("/Users/jgorski/Tests/GUI/conf.properties");
-	            input = new FileInputStream("res/conf.properties");
-				prop.load(input);
-	            platform = prop.getProperty("useDriver");
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        } finally {
-	            if (input != null) {
-	                try {
-	                    input.close();
-	                } catch (IOException e) {
-	                    e.printStackTrace();
-	                }
-	            }
-	        }
+       FileInputStream input = null;
+		Properties prop = new Properties();
+		prop = InitDriverListener.readProps("res/conf.properties");
+		platform = prop.getProperty("useDriver");
         /*
          * run suites
          */

@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.FileHandler;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -53,26 +54,8 @@ public class InitDriverListener implements ISuiteListener {
     @Override
     public void onStart(ISuite suite) {
         Properties prop = new Properties();
-        InputStream input = null;
-	/*
-	 * process properties
-	 */
-        try {
-//            input = new FileInputStream("/Users/jgorski/Tests/GUI/conf.properties");
-            input = new FileInputStream("res/conf.properties");
-            prop.load(input);
-            useDriver = prop.getProperty("useDriver");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        prop = readProps("res/conf.properties");
+        useDriver = prop.getProperty("useDriver");
         /*
          * open drivers
          */
@@ -110,9 +93,6 @@ public class InitDriverListener implements ISuiteListener {
         	try {
         		DesiredCapabilities safari = IOSCapabilities.iphone("Safari");
         		safari.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-        		//safari.setCapability("deviceName", "5A49E297-C396-4B1D-BB52-66C39DBCE3A4" );
-        		//safari.setCapability(IOSCapabilities.VARIATION, "iPhone6s");
-        		//safari.setCapability(IOSCapabilities.UUID, "ED1DFB85636C49759AA604242F4C7C5B");
 				driver = new RemoteWebDriver(new URL("http://localhost:4723/wd/hub"),safari);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -121,11 +101,41 @@ public class InitDriverListener implements ISuiteListener {
         	SafariOptions options = new SafariOptions();
         	 options.setUseCleanSession(true);
         	driver = new SafariDriver(options);
+        	try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	driver.manage().window().setSize(new Dimension(1024, 850));
+       		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         }
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    @Override
+    public static Properties readProps(String propFileName) {
+        Properties prop = new Properties();
+        InputStream input = null;
+	/*
+	 * process properties
+	 */
+        try {
+            input = new FileInputStream(propFileName);
+            prop.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+		return prop;
+	}
+
+	@Override
     public void onFinish(ISuite suite) {
         if(driver != null) {
             try {
