@@ -22,7 +22,7 @@ import static org.testng.Assert.assertTrue;
 import org.testng.Reporter;
 
 import com.clarity.QA.API.AVPairSet;
-import com.clarityservicelayerbeta.AvPair;
+import com.clarityservicelayer.portal.AvPair;
 
 public class CommandExecutor {
     WebDriver driver;
