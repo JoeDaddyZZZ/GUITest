@@ -72,8 +72,10 @@ public class CommandExecutor {
          * set question/answer data
          */
        	AVPairSet avSet = new AVPairSet();
-       	avSet.loadQuestions("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
-       	avSet.loadChoices("qatest.clarityssi.local","fmi2","qauser","ClAr1ty!");
+//       	avSet.loadQuestions(DBHost,DBSchema,DBUser,DBPassword);
+//      	avSet.loadChoices(DBHost,DBSchema,DBUser,DBPassword);
+       	avSet.loadQuestions("qatest.clarityssi.local","fmi2",DBUser,DBPassword);
+       	avSet.loadChoices("qatest.clarityssi.local","fmi2",DBUser,DBPassword);
         /*
          * loop through collected variables stored and replace
          */
@@ -81,6 +83,11 @@ public class CommandExecutor {
         	if(parameter.contains(varKey)) {
         		String p = parameter.replaceAll(varKey,varsToUse.get(varKey));
         		parameter = p;
+//        		System.out.println(" replaced in parameter " + parameter);
+        	}
+        	if(elementIdentifier.contains(varKey)) {
+        		String e = elementIdentifier.replaceAll(varKey,varsToUse.get(varKey));
+        		elementIdentifier= e;
 //        		System.out.println(" replaced in parameter " + parameter);
         	}
         }
