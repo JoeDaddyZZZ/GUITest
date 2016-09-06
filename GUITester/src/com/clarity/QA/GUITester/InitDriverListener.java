@@ -18,6 +18,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
@@ -101,7 +102,16 @@ public class InitDriverListener implements ISuiteListener {
             driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         } else if (useDriver.contains("Chrome")) {
         	System.setProperty("webdriver.chrome.driver", prop.getProperty("chromePath"));
-            driver = new ChromeDriver();
+            //driver = new ChromeDriver();
+        	/*
+        	 * 
+        	 */
+        	ChromeOptions chromeOptions = new ChromeOptions();
+        	//chromeOptions.setBinary(prop.getProperty("chromePath"));
+        	chromeOptions.addArguments("whitelisted-ips='52.86.63.89'");
+        	DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+        	capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+        	driver = new ChromeDriver(capabilities);	
         } else if (useDriver.contains("iPhone")) {
         	try {
         		DesiredCapabilities safari = IOSCapabilities.iphone("Safari");

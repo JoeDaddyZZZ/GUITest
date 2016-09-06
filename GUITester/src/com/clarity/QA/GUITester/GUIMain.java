@@ -27,15 +27,18 @@ public class GUIMain {
         
 //        String[] fileArray = {"/Users/jgorski/Tests/GUI/firstTouch.csv"};
         String[] fileArray = {
-        	//	"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
-        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx"
+//        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMinEnglish.xlsx",
+//        		"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalNegativeMinEnglish.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalNegativeMaxEnglish.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalPositiveMinSpanish.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxSpanish.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxFrench.xlsx",
         	//	"/Users/jgorski/Tests/API/PreferencePortalPositiveMinFrench.xlsx"
-        		"/Users/jgorski/Tests/API/CSRPositiveMax.xlsx"
+//       		"/Users/jgorski/Tests/API/CSRPositiveSimpleSearch.xlsx"
+       		"/Users/jgorski/Tests/API/CSRAllSimpleSearch.xlsx"
+        		//"/Users/jgorski/Tests/API/EdeliveryPositiveSimpleSearch.xlsx"
+        		//"/Users/jgorski/Tests/API/PreferencePortalPositiveMaxEnglish2.xlsx"
         		};
         //String fileName;
         if(args.length > 0) {

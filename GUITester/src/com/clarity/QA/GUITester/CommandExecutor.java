@@ -29,7 +29,8 @@ public class CommandExecutor {
     String baseWindowHdl = null;
     Map<String,String> paramMap = new HashMap<>();
     String DBHost= "qatest.clarityssi.local";
-    String DBSchema= "fmi2";
+//    String DBSchema= "fmi2";
+    String DBSchema= "test_masterindex";
     String DBUser= "qauser";
 //    String DBPassword= "ClAr1ty!";
     String DBPassword= "";
@@ -73,7 +74,7 @@ public class CommandExecutor {
          */
        	AVPairSet avSet = new AVPairSet();
 //       	avSet.loadQuestions(DBHost,DBSchema,DBUser,DBPassword);
-//      	avSet.loadChoices(DBHost,DBSchema,DBUser,DBPassword);
+ //     	avSet.loadChoices(DBHost,DBSchema,DBUser,DBPassword);
        	avSet.loadQuestions("qatest.clarityssi.local","fmi2",DBUser,DBPassword);
        	avSet.loadChoices("qatest.clarityssi.local","fmi2",DBUser,DBPassword);
         /*
@@ -252,19 +253,25 @@ public class CommandExecutor {
 				int colCount = rsmd.getColumnCount();
 				int j = 1;
 				for (WebElement row : driver.findElements(getBy(
-						elementIdentifier + "> tr", identifierType))) {
+						elementIdentifier + "/tbody/tr", identifierType))) {
 					int i = 1;
 					for (WebElement cell : row.findElements(getBy("td",
 							identifierType))) {
 						String colType = rsmd.getColumnTypeName(i);
 						if (rs.isBeforeFirst())
 							rs.next();
-						String colAnswer = getAnswer(colType, i, rs);
-						if (!cell.getText().equalsIgnoreCase(colAnswer)) {
-							Reporter.log("Line " + j + " Found |"
+						String colAnswer = getAnswer(colType, i, rs, parameter);
+						if(colAnswer != null ) {
+							if(colType.contains("DATE")&&colAnswer!=null) {
+								String newDateParts[] = colAnswer.split("-");
+								colAnswer = newDateParts[1]+"/"+newDateParts[2]+"/"+newDateParts[0];
+							}
+							if (!cell.getText().replaceAll("\\s+","").equalsIgnoreCase(colAnswer.replaceAll("\\s+",""))) {
+								Reporter.log("Line " + j + " Found |"
 									+ cell.getText() + "| Should Be |"
 									+ colAnswer + "| Type is " + colType);
-							isSame = false;
+								isSame = false;
+							}
 						}
 						if (i == colCount)
 							break;
@@ -378,9 +385,10 @@ public class CommandExecutor {
      * @param colType
      * @param i
      * @param rs
+     * @param parameter 
      * @return
      */
-	private String getAnswer(String colType, int i, ResultSet rs) {
+	private String getAnswer(String colType, int i, ResultSet rs, String parameter) {
 		String answer = "";
 		try {
 				if(colType.contains("INT")) {
@@ -398,6 +406,7 @@ public class CommandExecutor {
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
+				System.out.println(parameter);
 				e.printStackTrace();
 			}
 		return answer;
